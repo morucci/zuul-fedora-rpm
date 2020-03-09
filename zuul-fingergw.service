@@ -1,0 +1,14 @@
+[Unit]
+Description=Zuul Finger Gateway Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+SyslogIdentifier=zuul-fingergw
+EnvironmentFile=-/etc/sysconfig/zuul
+ExecStart=/usr/bin/zuul-fingergw -f
+
+[Install]
+WantedBy=multi-user.target

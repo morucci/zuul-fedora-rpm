@@ -1,0 +1,52 @@
+# Documentation in a separate sub-package
+addFilter("zuul.noarch: W: no-documentation")
+addFilter("zuul-executor.noarch: W: no-documentation")
+addFilter("zuul-fingergw.noarch: W: no-documentation")
+addFilter("zuul-merger.noarch: W: no-documentation")
+addFilter("zuul-migrate.noarch: W: no-documentation")
+addFilter("zuul-scheduler.noarch: W: no-documentation")
+addFilter("zuul-web.noarch: W: no-documentation")
+addFilter("zuul-webui.noarch: W: no-documentation")
+# Expected - Zuul services should run as the zuul user identity
+addFilter("zuul.noarch: W: non-standard-uid /etc/zuul/logging.conf zuul")
+addFilter("zuul.noarch: W: non-standard-gid /etc/zuul/logging.conf zuul")
+addFilter("zuul.noarch: W: non-standard-uid /etc/zuul/zuul.conf zuul")
+addFilter("zuul.noarch: W: non-standard-gid /etc/zuul/zuul.conf zuul")
+addFilter("zuul.noarch: W: non-standard-uid /var/lib/zuul zuul")
+addFilter("zuul.noarch: W: non-standard-gid /var/lib/zuul zuul")
+addFilter("zuul.noarch: W: non-standard-uid /var/lib/zuul/.ssh zuul")
+addFilter("zuul.noarch: W: non-standard-gid /var/lib/zuul/.ssh zuul")
+addFilter("zuul.noarch: W: non-standard-uid /var/lib/zuul/ansible zuul")
+addFilter("zuul.noarch: W: non-standard-gid /var/lib/zuul/ansible zuul")
+addFilter("zuul.noarch: W: non-standard-uid /var/lib/zuul/keys zuul")
+addFilter("zuul.noarch: W: non-standard-gid /var/lib/zuul/keys zuul")
+addFilter("zuul.noarch: W: non-standard-uid /var/log/zuul zuul")
+addFilter("zuul.noarch: W: non-standard-gid /var/log/zuul zuul")
+addFilter("zuul-executor.noarch: W: non-standard-uid /var/lib/zuul/ansible zuul")
+addFilter("zuul-executor.noarch: W: non-standard-gid /var/lib/zuul/ansible zuul")
+addFilter("zuul-executor.noarch: W: non-standard-uid /var/lib/zuul/executor zuul")
+addFilter("zuul-executor.noarch: W: non-standard-gid /var/lib/zuul/executor zuul")
+# Expected - zuul.conf can store credentials
+addFilter("zuul.noarch: E: non-readable /etc/zuul/zuul.conf 640")
+# Expected for now - https://review.opendev.org/728955 - does not âss the upstream CI
+addFilter("zuul.noarch: E: non-executable-script /usr/lib/python3.8/site-packages/zuul/ansible/base/library/command.py 644 /usr/bin/python3 ")
+addFilter("zuul.noarch: E: non-executable-script /usr/lib/python3.8/site-packages/zuul/ansible/base/library/zuul_console.py 644 /usr/bin/python3 ")
+# Expected - Zuul runtime expects to find that directory
+addFilter("zuul.noarch: W: hidden-file-or-dir /var/lib/zuul/.ssh")
+addFilter("zuul.noarch: W: hidden-file-or-dir /var/lib/zuul/.ssh")
+# Expected - Provided Python logging configuration configures the rotation
+addFilter("zuul.noarch: W: log-files-without-logrotate \['/var/log/zuul'\]")
+# Expected - upstream does not provide man pages
+addFilter("zuul.noarch: W: no-manual-page-for-binary zuul")
+addFilter("zuul.noarch: W: no-manual-page-for-binary zuul-bwrap")
+addFilter("zuul-executor.noarch: W: no-manual-page-for-binary zuul-executor")
+addFilter("zuul-executor.noarch: W: no-manual-page-for-binary zuul-manage-ansible")
+addFilter("zuul-fingergw.noarch: W: no-manual-page-for-binary zuul-fingergw")
+addFilter("zuul-merger.noarch: W: no-manual-page-for-binary zuul-merger")
+addFilter("zuul-migrate.noarch: W: no-manual-page-for-binary zuul-migrate")
+addFilter("zuul-scheduler.noarch: W: no-manual-page-for-binary zuul-scheduler")
+addFilter("zuul-web.noarch: W: no-manual-page-for-binary zuul-web")
+# Expected - executor service require python3-devel to install ansible virtualenvs
+addFilter("zuul-executor.noarch: E: devel-dependency python3-devel")
+# Expected - gearman is a protocol name
+addFilter("zuul-scheduler.noarch: W: spelling-error %description -l en_US gearman -> gear man, gear-man, germane")

@@ -1,0 +1,14 @@
+[Unit]
+Description=Zuul Web Service
+After=network.target
+
+[Service]
+Type=simple
+User=zuul
+Group=zuul
+SyslogIdentifier=zuul-web
+EnvironmentFile=-/etc/sysconfig/zuul
+ExecStart=/usr/bin/zuul-web -f
+
+[Install]
+WantedBy=multi-user.target

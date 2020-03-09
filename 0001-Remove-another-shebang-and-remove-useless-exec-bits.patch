@@ -1,0 +1,58 @@
+From 6feb399854ef55a3e43c5a46c56fae487dcd8d28 Mon Sep 17 00:00:00 2001
+From: Fabien Boucher <fboucher@redhat.com>
+Date: Tue, 19 May 2020 14:40:51 +0200
+Subject: [PATCH] Remove another shebang and remove useless exec bits
+
+Change-Id: Id49bc9a4b50948b1f07e4fa917c93acac0c2a17e
+---
+ zuul/cmd/__init__.py  | 0
+ zuul/cmd/client.py    | 0
+ zuul/cmd/executor.py  | 0
+ zuul/cmd/merger.py    | 5 -----
+ zuul/cmd/scheduler.py | 0
+ zuul/cmd/web.py       | 0
+ 6 files changed, 5 deletions(-)
+ mode change 100755 => 100644 zuul/cmd/__init__.py
+ mode change 100755 => 100644 zuul/cmd/client.py
+ mode change 100755 => 100644 zuul/cmd/executor.py
+ mode change 100755 => 100644 zuul/cmd/merger.py
+ mode change 100755 => 100644 zuul/cmd/scheduler.py
+ mode change 100755 => 100644 zuul/cmd/web.py
+
+diff --git a/zuul/cmd/__init__.py b/zuul/cmd/__init__.py
+old mode 100755
+new mode 100644
+diff --git a/zuul/cmd/client.py b/zuul/cmd/client.py
+old mode 100755
+new mode 100644
+diff --git a/zuul/cmd/executor.py b/zuul/cmd/executor.py
+old mode 100755
+new mode 100644
+diff --git a/zuul/cmd/merger.py b/zuul/cmd/merger.py
+old mode 100755
+new mode 100644
+index 1d4b6fef..9b827427
+--- a/zuul/cmd/merger.py
++++ b/zuul/cmd/merger.py
+@@ -1,4 +1,3 @@
+-#!/usr/bin/env python
+ # Copyright 2012 Hewlett-Packard Development Company, L.P.
+ # Copyright 2013-2014 OpenStack Foundation
+ #
+@@ -69,7 +68,3 @@ class Merger(zuul.cmd.ZuulDaemonApp):
+ 
+ def main():
+     Merger().main()
+-
+-
+-if __name__ == "__main__":
+-    main()
+diff --git a/zuul/cmd/scheduler.py b/zuul/cmd/scheduler.py
+old mode 100755
+new mode 100644
+diff --git a/zuul/cmd/web.py b/zuul/cmd/web.py
+old mode 100755
+new mode 100644
+-- 
+2.25.1
+

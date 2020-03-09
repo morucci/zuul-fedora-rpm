@@ -1,0 +1,70 @@
+TODO(fbo) This is still a draft here. Will be improved once we are clear with runtime deps.
+
+zuul-manage-ansible
+-------------------
+
+sudo -u zuul bash
+cd
+zuul-manage-ansible -u -r /var/lib/zuul/ansible-bin
+ls -al /var/lib/zuul/ansible-bin
+
+
+zuul-scheduler
+--------------
+
+Add in /etc/zuul/main.yaml:
+- tenant:
+    name: demo-tenant
+    source:
+      local_git:
+        config-projects:
+          - zuul-config
+
+Install zookeeper with nodepool tests.yml
+Comment MQTT section from zuul.conf
+Comment Gerrit section
+Comment the MySQL section
+
+systemctl start zuul-scheduler
+
+zuul-executor
+-------------
+
+systemctl start zuul-executor
+
+
+prepare basic config
+--------------------
+
+In zuul.conf add:
+[connection local_git]
+driver=git
+baseurl=http://localhost:8000/home/fedora
+poll_delay=300
+
+
+pip3 install --user dulwich
+dulwich web-daemon -l 0.0.0.0 /
+git init /home/fedora/zuul-config
+vim /home/fedora/zuul-config/.zuul.yaml
+- pipeline:
+    name: periodic
+    post-review: true
+    description: Jobs in this queue are triggered every minute.
+    manager: independent
+    precedence: low
+    trigger:
+      timer:
+        - time: '* * * * *'
+
+- project:
+    periodic:
+      jobs:
+        - noop
+git config user.name "John Doe"
+git config user.email "john@localhost"
+git add .zuul.yaml
+git commit -m"Init demo config"
+
+Dans les logs /var/log/zuul/zuul.log
+zuul.ExecutorClient: [e: 3f6a0ad4b46f4a9aa23744e3e6b9eea5] Execute job noop

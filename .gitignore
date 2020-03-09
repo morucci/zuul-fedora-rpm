@@ -1,0 +1,4 @@
+/zuul-3.18.0.tar.gz
+results_zuul
+*.rpm
+/zuul-3.19.0.tar.gz

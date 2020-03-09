@@ -1,0 +1,28 @@
+From ea0b50c90d22a2f24b288e1a91e2b85f17059cbc Mon Sep 17 00:00:00 2001
+From: Tristan Cacqueray <tdecacqu@redhat.com>
+Date: Mon, 25 May 2020 17:39:59 +0000
+Subject: [PATCH] requirements: add explicit reference to dateutil
+
+Zuul is using a dateutil provided transitively. This change
+makes the requirements explicit.
+
+Change-Id: I672d409a1bb241e5d199c77acdd51a8260d99ee2
+---
+ requirements.txt | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/requirements.txt b/requirements.txt
+index 732aa35a..78eb980f 100644
+--- a/requirements.txt
++++ b/requirements.txt
+@@ -4,6 +4,7 @@ importlib-resources==1.0.2
+ # Early virtualenv 20 had bad file location assumptions
+ virtualenv!=20.0.0,!=20.0.1,>20
+ 
++python-dateutil
+ github3.py>=1.1.0
+ PyYAML>=3.1.0
+ paramiko>=2.0.1
+-- 
+2.25.4
+

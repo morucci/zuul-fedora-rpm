@@ -1,3 +1,5 @@
+%{?python_disable_dependency_generator}
+
 Name:           zuul
 Version:        3.19.0
 Release:        1%{?dist}
@@ -15,6 +17,7 @@ Source6:        zuul-fingergw.service
 Source7:        README.fedora
 Source8:        zuul.conf
 Source9:        logging.conf
+Source10:       main.yaml
 
 Patch01:        0001-Remove-another-shebang-and-remove-useless-exec-bits.patch
 Patch02:        0001-requirements-add-explicit-reference-to-dateutil.patch
@@ -24,16 +27,12 @@ BuildArch:      noarch
 
 #Error:
 # Problem: conflicting requests
-
-# https://src.fedoraproject.org/rpms/python-virtualenv/pull-request/20
-#  - nothing provides ((python3.8dist(virtualenv) < 20 or python3.8dist(virtualenv) > 20) with (python3.8dist(virtualenv) < 20.0.1 or python3.8dist(virtualenv) > 20.0.1) with python3.8dist(virtualenv) > 20) needed by zuul-3.19.0-1.fc33.noarch
-
 # https://github.com/cherrypy/cheroot/issues/263 # the zuul cap reason
 # The proposed fix https://github.com/cherrypy/cheroot/pull/277
 # https://bugzilla.redhat.com/show_bug.cgi?id=1834207
 #  - nothing provides python3.8dist(cheroot) < 8.1 needed by zuul-3.19.0-1.fc33.noarch
-
 #  - nothing provides python3.8dist(cherrypy) = 18.3 needed by zuul-3.19.0-1.fc33.noarch
+# TODO: https://bugzilla.redhat.com/show_bug.cgi?id=1849654
 
 
 BuildRequires:  python3-devel
@@ -42,7 +41,8 @@ BuildRequires:  python3-setuptools
 BuildRequires:  python3-zuul-sphinx
 BuildRequires:  python3-snowballstemmer
 BuildRequires:  python3-fixtures
-BuildRequires:  python3-sphinx-autodoc-typehints
+# TODO: https://bugzilla.redhat.com/show_bug.cgi?id=1849654
+# BuildRequires:  python3-sphinx-autodoc-typehints
 BuildRequires:  python3-sphinxcontrib-blockdiag
 BuildRequires:  python3-sphinxcontrib-programoutput
 BuildRequires:  python3-sphinxcontrib-openapi
@@ -79,10 +79,61 @@ BuildRequires:  python3-iso8601
 BuildRequires:  python3-PyMySQL
 BuildRequires:  python3-psycopg2
 BuildRequires:  python3-pathspec
-# BuildRequires:  python3-graphene
+BuildRequires:  python3-graphene
 BuildRequires:  systemd
 BuildRequires:  ansible
 
+#rpm -qpR results_zuul/3.19.0/1.fc33/zuul-3.19.0-1.fc33.noarch.rpm 
+Requires:       ((python3.9dist(gear) < 0.15 or python3.9dist(gear) > 0.15) with python3.9dist(gear) < 1 with python3.9dist(gear) >= 0.13)
+Requires:       ((python3.9dist(urllib3) < 1.25.4 or python3.9dist(urllib3) > 1.25.4) with (python3.9dist(urllib3) < 1.25.5 or python3.9dist(urllib3) > 1.25.5))
+Requires:       ((python3.9dist(virtualenv) < 20 or python3.9dist(virtualenv) > 20) with (python3.9dist(virtualenv) < 20.0.1 or python3.9dist(virtualenv) > 20.0.1) with python3.9dist(virtualenv) > 20)
+Requires:       (python3.9dist(prettytable) < 0.8 with python3.9dist(prettytable) >= 0.6)
+Requires:       /bin/sh
+Requires:       /usr/bin/python3
+Requires:       config(zuul) = 3.19.0-1.fc33
+Requires:       python(abi) = 3.9
+Requires:       python3-cheroot
+Requires:       python3.9dist(alembic)
+Requires:       python3.9dist(apscheduler) >= 3
+Requires:       python3.9dist(babel) >= 1
+Requires:       python3.9dist(cachecontrol)
+Requires:       python3.9dist(cachetools)
+
+#Requires:       python3.9dist(cheroot) < 8.1
+#Requires:       python3.9dist(cherrypy) = 18.3
+Requires:       python3.9dist(cheroot)
+Requires:       python3.9dist(cherrypy)
+
+Requires:       python3.9dist(cryptography) >= 1.6
+Requires:       python3.9dist(extras)
+Requires:       python3.9dist(fb-re2) >= 1.0.6
+Requires:       python3.9dist(github3-py) >= 1.1
+Requires:       python3.9dist(gitpython) >= 2.1.8
+Requires:       python3.9dist(iso8601)
+Requires:       python3.9dist(jsonpath-rw)
+Requires:       python3.9dist(kazoo)
+Requires:       python3.9dist(netaddr)
+Requires:       python3.9dist(paho-mqtt)
+Requires:       python3.9dist(paramiko) >= 2.0.1
+Requires:       python3.9dist(pathspec)
+Requires:       python3.9dist(pbr) >= 1.1
+Requires:       python3.9dist(psutil)
+Requires:       python3.9dist(pyjwt)
+Requires:       python3.9dist(python-daemon) >= 2.0.4
+Requires:       python3.9dist(python-dateutil)
+Requires:       python3.9dist(pyyaml) >= 3.1
+Requires:       python3.9dist(routes)
+Requires:       python3.9dist(setuptools)
+Requires:       python3.9dist(sqlalchemy)
+Requires:       python3.9dist(statsd) >= 3
+Requires:       python3.9dist(voluptuous) >= 0.10.2
+Requires:       python3.9dist(ws4py)
+Requires:       rpmlib(CompressedFileNames) <= 3.0.4-1
+Requires:       rpmlib(FileDigests) <= 4.6.0-1
+Requires:       rpmlib(PartialHardlinkSets) <= 4.0.4-1
+Requires:       rpmlib(PayloadFilesHavePrefix) <= 4.0-1
+Requires:       rpmlib(PayloadIsZstd) <= 5.4.18-1
+Requires:       rpmlib(RichDependencies) <= 4.12.0-1
 
 %description
 Zuul is a program that drives continuous integration, delivery,
@@ -138,6 +189,7 @@ Requires: bubblewrap
 ## Requires: python3-virtualenv
 Requires: gcc
 Requires: python3-devel
+Requires: libffi-devel
 
 %description executor
 Scale-out component for executing jobs. At least one of these is
@@ -205,6 +257,8 @@ chmod +x build/zuul-manage-ansible
 # Generate documentation (without release note because source doesn't have git log)
 sed -e 's/^ *releasenotes$//' -i doc/source/reference/index.rst
 rm doc/source/reference/releasenotes.rst
+# TODO: https://bugzilla.redhat.com/show_bug.cgi?id=1849654
+sed '/sphinx_autodoc_typehints/d' -i doc/source/conf.py
 PYTHONPATH=../../build/lib PATH=$PATH:$(pwd)/build PBR_VERSION=%{version} SPHINX_DEBUG=1 sphinx-build-3 \
     -b html doc/source build/html
 # Remove empty stub files
@@ -224,6 +278,7 @@ install -p -D -m 0644 %{SOURCE5} %{buildroot}%{_unitdir}/zuul-web.service
 install -p -D -m 0644 %{SOURCE6} %{buildroot}%{_unitdir}/zuul-fingergw.service
 install -p -D -m 0640 %{SOURCE8} %{buildroot}%{_sysconfdir}/zuul/zuul.conf
 install -p -D -m 0640 %{SOURCE9} %{buildroot}%{_sysconfdir}/zuul/logging.conf
+install -p -D -m 0640 %{SOURCE10} %{buildroot}%{_sysconfdir}/zuul/main.yaml
 install -p -d -m 0700 %{buildroot}%{_sharedstatedir}/zuul
 install -p -d -m 0700 %{buildroot}%{_localstatedir}/log/zuul
 
@@ -270,12 +325,15 @@ exit 0
 %files
 %license LICENSE
 %config(noreplace) %attr(0640,zuul,zuul) %{_sysconfdir}/zuul/zuul.conf
+%config(noreplace) %attr(0640,zuul,zuul) %{_sysconfdir}/zuul/main.yaml
 %config(noreplace) %attr(0644,zuul,zuul) %{_sysconfdir}/zuul/logging.conf
 %dir %attr(0755,zuul,zuul) %{_sharedstatedir}/zuul
 %dir %attr(0755,zuul,zuul) %{_sharedstatedir}/zuul/.ssh
 %dir %attr(0755,zuul,zuul) %{_sharedstatedir}/zuul/ansible
 %dir %attr(0755,zuul,zuul) %{_sharedstatedir}/zuul/keys
-%dir %attr(0755,zuul,zuul) %{_localstatedir}/log/zuul
+# Zuul runtime check
+# Project key directory /var/lib/zuul/keys must be mode 0700; current mode is 755
+%dir %attr(0700,zuul,zuul) %{_localstatedir}/log/zuul
 %{python3_sitelib}/zuul
 %{python3_sitelib}/zuul-*.egg-info/
 %{_bindir}/zuul

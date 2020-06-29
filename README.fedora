@@ -1,12 +1,39 @@
 TODO(fbo) This is still a draft here. Will be improved once we are clear with runtime deps.
 
+https://zuul-ci.org/docs/zuul/howtos/installation.html
+
 zuul-manage-ansible
 -------------------
 
-sudo -u zuul bash
-cd
-zuul-manage-ansible -u -r /var/lib/zuul/ansible-bin
-ls -al /var/lib/zuul/ansible-bin
+Prepare Ansible Virtualenv for every supported Ansible versions for the executor service.
+
+sudo -u zuul bash -c "cd && zuul-manage-ansible -u -r /var/lib/zuul/ansible-bin"
+
+zuul-web
+--------
+
+systemctl start zuul-web
+curl http://localhost:9000/api/tenants
+
+zuul-webui
+----------
+
+dnf install -y nodejs
+curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo
+sudo dnf install yarn
+cd /usr/share/zuul-ui/
+yarn install
+REACT_APP_ZUUL_API='http://zuul-web.example.com' yarn build
+
+httpd
+-----
+
+dnf install httpd
+setsebool -P httpd_can_network_connect on
+Add in /etc/httpd/conf.d/zuul.conf
+RewriteEngine on
+RewriteRule ^/api/tenant/(.*)/console-stream ws://localhost:9000/api/tenant/$1/console-stream [P]
+RewriteRule ^/(.*)$ http://localhost:9000/$1 [P]
 
 
 zuul-scheduler

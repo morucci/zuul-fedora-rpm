@@ -1,0 +1,54 @@
+From b27dc5df5dc1617fc2f1d438611b87b3e63383c4 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Miro=20Hron=C4=8Dok?= <miro@hroncok.cz>
+Date: Mon, 1 Jun 2020 12:49:07 +0200
+Subject: [PATCH] Replace deprecated Thread.isAlive() with Thread.is_alive()
+
+The isAlive() method of threading.Thread has been removed in Python 3.9.
+The is_alive() method is available on Python 2.6+.
+
+See https://bugs.python.org/issue37804
+
+Change-Id: I951b1ae331c3101722fe34babf81d6f82d838380
+---
+ zuul/ansible/base/library/command.py | 4 ++--
+ zuul/lib/log_streamer.py             | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/zuul/ansible/base/library/command.py b/zuul/ansible/base/library/command.py
+index a3b969d9..0c461b3a 100755
+--- a/zuul/ansible/base/library/command.py
++++ b/zuul/ansible/base/library/command.py
+@@ -474,7 +474,7 @@ def zuul_run_command(self, args, zuul_log_id, check_rc=False, close_fds=True, ex
+         if t:
+             t.join(10)
+             with Console(zuul_log_id) as console:
+-                if t.isAlive():
++                if t.is_alive():
+                     console.addLine("[Zuul] standard output/error still open "
+                                     "after child exited")
+             # ZUUL: stdout and stderr are in the console log file
+@@ -495,7 +495,7 @@ def zuul_run_command(self, args, zuul_log_id, check_rc=False, close_fds=True, ex
+     finally:
+         if t:
+             with Console(zuul_log_id) as console:
+-                if t.isAlive():
++                if t.is_alive():
+                     console.addLine("[Zuul] standard output/error still open "
+                                     "after child exited")
+                 if fail_json_kwargs:
+diff --git a/zuul/lib/log_streamer.py b/zuul/lib/log_streamer.py
+index 16b72227..9ed124c5 100644
+--- a/zuul/lib/log_streamer.py
++++ b/zuul/lib/log_streamer.py
+@@ -181,7 +181,7 @@ class LogStreamer(object):
+             raise
+ 
+     def stop(self):
+-        if self.thd.isAlive():
++        if self.thd.is_alive():
+             self.server.shutdown()
+             self.server.server_close()
+             self.thd.join()
+-- 
+2.25.4
+

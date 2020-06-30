@@ -21,6 +21,7 @@ Source10:       main.yaml
 
 Patch01:        0001-Remove-another-shebang-and-remove-useless-exec-bits.patch
 Patch02:        0001-requirements-add-explicit-reference-to-dateutil.patch
+Patch03:        0001-Replace-deprecated-Thread.isAlive-with-Thread.is_ali.patch
 
 BuildArch:      noarch
 
@@ -172,6 +173,7 @@ This component is optional (zero or more of these can be run).
 
 %package web
 Requires: %{name} = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires: nodejs
 Summary: The Zuul web service
 
 %description web
@@ -243,6 +245,11 @@ EOF
 install -m 0644 %{SOURCE7} README.fedora
 # Fix wrong-file-end-of-line-encoding
 sed -i 's/\r$//' LICENSE
+# Fix 0001-Replace-deprecated-Thread.isAlive-with-Thread.is_ali.patch not fully apply
+# due to pypi archive removing the symlinks
+cp zuul/ansible/base/library/command.py zuul/ansible/2.7/library/
+cp zuul/ansible/base/library/command.py zuul/ansible/2.8/library/
+cp zuul/ansible/base/library/command.py zuul/ansible/2.9/library/
 
 %build
 %py3_build
@@ -330,7 +337,7 @@ exit 0
 %dir %attr(0755,zuul,zuul) %{_sharedstatedir}/zuul
 %dir %attr(0755,zuul,zuul) %{_sharedstatedir}/zuul/.ssh
 %dir %attr(0755,zuul,zuul) %{_sharedstatedir}/zuul/ansible
-%dir %attr(0755,zuul,zuul) %{_sharedstatedir}/zuul/keys
+%dir %attr(0700,zuul,zuul) %{_sharedstatedir}/zuul/keys
 # Zuul runtime check
 # Project key directory /var/lib/zuul/keys must be mode 0700; current mode is 755
 %dir %attr(0700,zuul,zuul) %{_localstatedir}/log/zuul

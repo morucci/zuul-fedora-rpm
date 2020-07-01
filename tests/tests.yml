@@ -17,3 +17,7 @@
     - import_tasks: setup_zuul_web.yml
       tags:
         - setup_zuul_web
+    # Now configure Zuul to run a job 
+    - import_tasks: configure_zuul_jobs.yml
+      tags:
+        - configure_zuul_jobs

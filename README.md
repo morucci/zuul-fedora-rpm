@@ -229,6 +229,7 @@ $ git commit -m"Init demo config"
 ### Run a Git deamon to serve the config repository
 
 ```
+$ sudo dnf install -y python3-dulwich
 $ dulwich web-daemon -l 0.0.0.0 /
 ```
 

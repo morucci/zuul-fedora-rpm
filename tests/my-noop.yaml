@@ -1,0 +1,8 @@
+---
+- hosts: localhost
+  tasks:
+    - name: List working directory
+      command: ls -al {{ ansible_user_dir }}
+    - name: Sleep 30 seconds
+      wait_for:
+        timeout: 30

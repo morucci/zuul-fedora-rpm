@@ -1,0 +1,84 @@
+- name: Install dulwich
+  package:
+    name: python3-dulwich
+    state: present
+  become: true
+
+- name: Create a local git repository
+  shell: git init {{ ansible_user_dir }}/zuul-config
+
+- name: Create .zuul.yaml
+  copy:
+    src: zuul.yaml
+    dest: "{{ ansible_user_dir }}/zuul-config/.zuul.yaml"
+
+- name: Create my-noop.yaml
+  copy:
+    src: my-noop.yaml
+    dest: "{{ ansible_user_dir }}/zuul-config/my-noop.yaml"
+
+- name: Commit zuul-config changes
+  shell: "{{ item }}"
+  register: cmd
+  failed_when:
+    - cmd.rc != 0
+    - not "'nothing to commit' in cmd.stdout" 
+  args:
+    chdir: "{{ ansible_user_dir }}/zuul-config/"
+  loop:
+    - git config user.name "John Doe"
+    - git config user.email "john@localhost"
+    - git add -A .
+    - git commit -m"Init demo config" 
+
+- name: Ensure dulwich down
+  shell: pkill -f dulwich
+
+- name: Ensure dulwich running
+  shell: "dulwich web-daemon -l 0.0.0.0 / &"
+
+- name: Add the git connection into the zuul config
+  blockinfile:
+    path: /etc/zuul/zuul.conf
+    marker: "# {mark} local_git"
+    block: |
+      [connection local_git]
+      driver=git
+      baseurl=http://localhost:8000/home/fedora
+      poll_delay=300
+  become: true
+
+- name: Setup the Zuul default tenant to load zuul-config
+  copy:
+    src: main.yaml
+    dest: /etc/zuul/main.yaml
+  become: true
+
+- name: Restart Zuul components
+  service:
+    name: "{{ item }}"
+    state: restarted
+  become: true
+  loop:
+    - zuul-scheduler
+    - zuul-executor
+    - zuul-web
+
+- name: Give some time to services to fully start
+  pause:
+    seconds: 15
+
+- name: Check zuul services are up
+  shell: systemctl is-active {{ item }}
+  loop:
+    - zuul-scheduler
+    - zuul-executor
+    - zuul-web
+  become: true
+
+- name: Give some time to Zuul to trigger and execute the job
+  pause:
+    minutes: 1
+
+- name: Ensure the my-noop job was executed
+  shell: python -c "import requests; r = requests.get('http://localhost/api/tenant/default/builds').json(); assert r[0]['job_name'] == 'my-noop'; assert r[0]['result'] == 'SUCCESS'"

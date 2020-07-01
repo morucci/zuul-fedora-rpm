@@ -1,0 +1,24 @@
+- pipeline:
+    name: periodic
+    post-review: true
+    description: Jobs in this queue are triggered every minute.
+    manager: independent
+    precedence: low
+    trigger:
+      timer:
+        - time: '* * * * *'
+    success:
+      sqlreporter:
+    failure:
+      sqlreporter:
+
+- job:
+    name: my-noop
+    description: Minimal working job
+    parent: null
+    run: my-noop.yaml
+
+- project:
+    periodic:
+      jobs:
+        - my-noop

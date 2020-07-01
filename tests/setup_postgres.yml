@@ -17,7 +17,7 @@
   shell: createdb --owner=postgres zuul
   register: cmd
   failed_when: cmd.rc != 0 and not "'already exists' in cmd.stderr"
-  ignore_errors: true
+  # ignore_errors: true
   become_user: postgres
   become: true
   environment:

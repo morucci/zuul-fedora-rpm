@@ -7,9 +7,16 @@
     - zuul-scheduler
   become: true
 
+- name: Setup the Zuul default tenant to be empty
+  copy:
+    src: orig_main.yaml
+    dest: /etc/zuul/main.yaml
+  become: true
+
 - name: Define the sql connection
   blockinfile:
     path: /etc/zuul/zuul.conf
+    marker: "# {mark} sqlreporter"
     block: |
       [connection sqlreporter]
       driver=sql

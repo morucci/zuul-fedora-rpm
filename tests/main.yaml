@@ -1,0 +1,6 @@
+- tenant:
+    name: default
+    source:
+      local_git:
+        config-projects:
+          - zuul-config

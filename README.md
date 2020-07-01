@@ -18,46 +18,58 @@ to bootstrap Zuul.
 This process describes the minimal steps to get a Zookeeper service running. You
 should refer to the Zookeeper documentation to get a production setup if needed.
 
-  $ mkdir /tmp/zookeeper && cd /tmp/zookeeper
-  $ curl -OL https://downloads.apache.org/zookeeper/zookeeper-3.6.1/apache-zookeeper-3.6.1-bin.tar.gz
-  $ tar -xvzf apache-zookeeper-3.6.1-bin.tar.gz
-  $ cp apache-zookeeper-3.6.1-bin/conf/zoo_sample.cfg apache-zookeeper-3.6.1-bin/conf/zoo.cfg
-  $ sudo apache-zookeeper-3.6.1-bin/bin/zkServer.sh start
+```
+$ mkdir /tmp/zookeeper && cd /tmp/zookeeper
+$ curl -OL https://downloads.apache.org/zookeeper/zookeeper-3.6.1/apache-zookeeper-3.6.1-bin.tar.gz
+$ tar -xvzf apache-zookeeper-3.6.1-bin.tar.gz
+$ cp apache-zookeeper-3.6.1-bin/conf/zoo_sample.cfg apache-zookeeper-3.6.1-bin/conf/zoo.cfg
+$ sudo apache-zookeeper-3.6.1-bin/bin/zkServer.sh start
+```
 
 ### Install and setup postgresql
 
 This process describes the minimal steps to get a postgres service running. You
 should refer to the postgrres documentation to get a production setup if needed.
 
-  $ sudo dnf install -y posgresql python3-psycopg2
-  $ su - postgres
-  $ psql
-    ALTER USER postgres WITH PASSWORD 'mypassword';
-  $ createdb --owner=postgres zuul
-  $ exit
+```
+$ sudo dnf install -y posgresql python3-psycopg2
+$ su - postgres
+$ psql
+  ALTER USER postgres WITH PASSWORD 'mypassword';
+$ createdb --owner=postgres zuul
+$ exit
+```
 
 Update the local access setting:
 
- $ sudo sed -i /var/lib/pgsql/data/pg_hba.conf 's/127.0.0.1/32            ident/127.0.0.1/32            md5/'
- $ sudo systemctl restart posgreql
+```
+$ sudo sed -i /var/lib/pgsql/data/pg_hba.conf 's/127.0.0.1/32            ident/127.0.0.1/32            md5/'
+$ sudo systemctl restart posgreql
+```
 
 Validate server connection by running:
 
-  $ psql -h 127.0.0.1 -U postgres -W zuul
+```
+$ psql -h 127.0.0.1 -U postgres -W zuul
+```
 
 ### Install Zuul components
 
 To install the packages run:
 
-  $ sudo dnf install zuul-scheduler zuul-executor zuul-web zuul-webui
+```
+$ sudo dnf install zuul-scheduler zuul-executor zuul-web zuul-webui
+```
 
 ### Update the zuul configuration to define the sql connection
 
 In /etc/zuul/zuul.conf add the following:
 
-  [connection sqlreporter]
-  driver=sql
-  dburi=postgresql://postgres:mypassword@127.0.0.1:5432/zuul
+```
+[connection sqlreporter]
+driver=sql
+dburi=postgresql://postgres:mypassword@127.0.0.1:5432/zuul
+```
 
 ### Setup Ansible virtual environment for the Zuul executor
 
@@ -66,7 +78,9 @@ a set of Ansible playbook. The Zuul executor supports multiple version of Ansibl
 Zuul provides a tool to manage the Ansible virtual environments. To initialize them
 run:
 
-  $ sudo -u zuul bash -c "cd && zuul-manage-ansible -u -r /var/lib/zuul/ansible-bin" 
+```
+$ sudo -u zuul bash -c "cd && zuul-manage-ansible -u -r /var/lib/zuul/ansible-bin" 
+```
 
 ### Build the Zuul web UI
 
@@ -74,11 +88,13 @@ The Zuul web UI is a React application. The Zuul packaging provides the source c
 the application. The following process describe how to compile the source to get a
 production build:
 
-  $ curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo
-  $ sudo dnf install yarn
-  $ cd /usr/share/zuul-ui/
-  $ yarn install
-  $ REACT_APP_ZUUL_API='<api_url>' yarn build
+```
+$ curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo
+$ sudo dnf install yarn
+$ cd /usr/share/zuul-ui/
+$ yarn install
+$ REACT_APP_ZUUL_API='<api_url>' yarn build
+```
 
 Replace <api_url> by the URL where the zuul-web API is listening.
 
@@ -86,9 +102,11 @@ Replace <api_url> by the URL where the zuul-web API is listening.
 
 To do so run:
 
-  $ sudo -u zuul bash -c "ssh-keygen -t rsa -N '' -f /var/lib/zuul/.ssh/id_rsa"
-  $ sudo systemctl start zuul-scheduler
-  $ sudo systemctl start zuul-executor
+```
+$ sudo -u zuul bash -c "ssh-keygen -t rsa -N '' -f /var/lib/zuul/.ssh/id_rsa"
+$ sudo systemctl start zuul-scheduler
+$ sudo systemctl start zuul-executor
+```
 
 The services logs are available into /var/log/zuul/zuul.log.
 
@@ -96,31 +114,43 @@ The services logs are available into /var/log/zuul/zuul.log.
 
 Install Apache:
 
-  $ sudo dnf install httpd
-  $ setsebool -P httpd_can_network_connect on
+```
+$ sudo dnf install httpd
+$ setsebool -P httpd_can_network_connect on
+```
 
 Then setup the reverve proxy by adding to /etc/httpd/conf.d/zuul.conf the
 following content:
 
-  RewriteEngine on
-  RewriteRule ^/api/tenant/(.*)/console-stream ws://localhost:9000/api/tenant/$1/console-stream [P]
-  RewriteRule ^/(.*)$ http://localhost:9000/$1 [P]
+```
+RewriteEngine on
+RewriteRule ^/api/tenant/(.*)/console-stream ws://localhost:9000/api/tenant/$1/console-stream [P]
+RewriteRule ^/(.*)$ http://localhost:9000/$1 [P]
+```
 
 Reload Apache:
 
-  $ sudo systemctl relead httpd
+```
+$ sudo systemctl relead httpd
+```
 
 Finally start the zuul-web process
 
-  $ sudo systemctl start zuul-web
+```
+$ sudo systemctl start zuul-web
+```
 
 Validate the direct access to the API by running:
 
-  $ curl http://localhost:9000/api/tenants
+```
+$ curl http://localhost:9000/api/tenants
+```
 
 Validate the access to the API via the reverse proxy:
 
-  $ curl http://<site_url>/api/tenants
+```
+$ curl http://<site_url>/api/tenants
+```
 
 ## Run a first Zuul job
 
@@ -140,10 +170,13 @@ We need to prepare a local Git repository to host the pipelines and jobs configu
 
 Follow the process below:
 
- $ git init /home/fedora/zuul-config
+```
+$ git init /home/fedora/zuul-config
+```
 
 In /home/fedora/zuul-config/.zuul.yaml add the following content:
 
+```
 - pipeline:
     name: periodic
     post-review: true
@@ -168,9 +201,11 @@ In /home/fedora/zuul-config/.zuul.yaml add the following content:
     periodic:
       jobs:
         - my-noop
+```
 
 Create the /home/fedora/zuul-config/my-noop.yaml and add the following content:
 
+```
 ---
 - hosts: localhost
   tasks:
@@ -179,51 +214,65 @@ Create the /home/fedora/zuul-config/my-noop.yaml and add the following content:
     - name: Sleep 30 seconds
       wait_for:
         timeout: 30
+```
 
 Then commit the configuration by running:
 
-  $ cd /home/fedora/zuul-config/
-  $ git config user.name "John Doe"
-  $ git config user.email "john@localhost"
-  $ git add -A .
-  $ git commit -m"Init demo config"
-
+```
+$ cd /home/fedora/zuul-config/
+$ git config user.name "John Doe"
+$ git config user.email "john@localhost"
+$ git add -A .
+$ git commit -m"Init demo config"
+```
 
 ### Run a Git deamon to serve the config repository
 
-  $ dulwich web-daemon -l 0.0.0.0 /
+```
+$ dulwich web-daemon -l 0.0.0.0 /
+```
 
 ### Add the new connection in the Zuul configuration
 
 In /etc/zuul/zuul.conf add the following:
 
-  [connection local_git]
-  driver=git
-  baseurl=http://localhost:8000/home/fedora
-  poll_delay=300
+```
+[connection local_git]
+driver=git
+baseurl=http://localhost:8000/home/fedora
+poll_delay=300
+```
 
 ### Setup the Zuul tenant configuration file
 
 In /etc/zuul/main.yaml add the following:
 
-  - tenant:
-      name: default
-      source:
-        local_git:
-          config-projects:
-            - zuul-config
+```
+- tenant:
+    name: default
+    source:
+      local_git:
+        config-projects:
+          - zuul-config
+```
 
 ### Restart the Zuul services
 
-  $ sudo systemctl restart zuul-*
+```
+$ sudo systemctl restart zuul-*
+```
 
 ### Verify the job executed periodically
 
 Run the following command to access the builds API endpoint and ensure the
 my-noop job run as expected every minutes w/o errors.
 
-  $ curl http://<host>/api/tenant/default/builds | python -m json.tool
+```
+$ curl http://<host>/api/tenant/default/builds | python -m json.tool
+```
 
 Access the build page, where you should see the periodic job my-noop runs
 
-  http://<host>/t/default/builds
+```
+http://<host>/t/default/builds
+```

@@ -14,7 +14,7 @@ Source3:        zuul-merger.service
 Source4:        zuul-executor.service
 Source5:        zuul-web.service
 Source6:        zuul-fingergw.service
-Source7:        README.fedora
+Source7:        README.md
 Source8:        zuul.conf
 Source9:        logging.conf
 Source10:       main.yaml

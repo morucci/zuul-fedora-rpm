@@ -1,0 +1,10 @@
+- name: Install Zuul packages
+  package:
+    name:
+      - zuul-scheduler
+      - zuul-executor
+      - zuul-web
+      - zuul-webui
+      - zuul-doc
+    state: present
+  become: true

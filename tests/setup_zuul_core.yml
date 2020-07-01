@@ -1,0 +1,49 @@
+- name: Ensure scheduler and executor service are down
+  service:
+    name: "{{ item }}"
+    state: stopped
+  loop:
+    - zuul-executor
+    - zuul-scheduler
+  become: true
+
+- name: Define the sql connection
+  blockinfile:
+    path: /etc/zuul/zuul.conf
+    block: |
+      [connection sqlreporter]
+      driver=sql
+      dburi=postgresql://postgres:mypassword@127.0.0.1:5432/zuul
+  become: true
+
+- name: Setup Ansible virtual environment for the Zuul executor
+  shell: zuul-manage-ansible -u -r /var/lib/zuul/ansible-bin
+  become_user: zuul
+  become: true
+
+- name: Create ssh keypair for Zuul
+  shell: ssh-keygen -t rsa -N '' -f /var/lib/zuul/.ssh/id_rsa
+  args:
+    creates: /var/lib/zuul/.ssh/id_rsa
+  become_user: zuul
+  become: true
+
+- name: Start scheduler and executor services
+  service:
+    name: "{{ item }}"
+    state: started
+  loop:
+    - zuul-executor
+    - zuul-scheduler
+  become: true
+
+- name: Give some time to services to fully start
+  pause:
+    seconds: 15
+
+- name: Check zuul core services are up
+  shell: systemctl is-active {{ item }}
+  loop:
+    - zuul-executor
+    - zuul-scheduler
+  become: true

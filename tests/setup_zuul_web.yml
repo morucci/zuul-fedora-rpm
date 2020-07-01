@@ -1,0 +1,79 @@
+- name: Ensure zuul-web service is down
+  service:
+    name: zuul-web
+    state: stopped
+  become: true
+
+- name: Install httpd
+  package:
+    name:
+      - httpd
+    state: present
+  become: true
+
+- name: Ensure httpd can connect to zuul-web
+  command: setsebool -P httpd_can_network_connect on
+  become: true
+
+- name: Add the reverse proxy setting in httpd
+  blockinfile:
+    path: /etc/httpd/conf.d/zuul.conf
+    block: |
+      RewriteEngine on
+      RewriteRule ^/api/tenant/(.*)/console-stream ws://localhost:9000/api/tenant/$1/console-stream [P]
+      RewriteRule ^/(.*)$ http://localhost:9000/$1 [P]
+  become: true
+
+- name: Reload httpd
+  service:
+    name: httpd
+    state: reloaded
+  become: true
+
+- name: Add the yarn yum repository
+  shell: "curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo"
+  become: true
+
+- name: Install yarn
+  package:
+    name: yarn
+    state: present
+  become: true
+
+- name: Start a production build of the Zuul web UI
+  shell: "{{ item }}"
+  args:
+    chdir: /usr/share/zuul-ui/
+  environment:
+    REACT_APP_ZUUL_API: 'http://domain.com'
+  loop:
+    - yarn install
+    - yarn build
+  become: true
+
+- name: Ensure zuul-web service is up
+  service:
+    name: zuul-web
+    state: started
+  become: true
+
+- name: Give some time to services to fully start
+  pause:
+    seconds: 15
+
+- name: Check zuul web services are up
+  shell: systemctl is-active {{ item }}
+  loop:
+    - zuul-web
+    - httpd
+  become: true
+
+- name: Check we can access the Zuul API
+  shell: curl http://localhost:9000/api/tenants
+  register: cmd
+  failed_when: not "'default' in cmd.stdout"
+
+- name: Check we can access the Zuul API via httpd
+  shell: curl http://localhost/api/tenants
+  register: cmd
+  failed_when: not "'default' in cmd.stdout"

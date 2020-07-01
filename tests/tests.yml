@@ -1,0 +1,19 @@
+- hosts: localhost
+  vars:
+    zookeeper_version: "3.6.1"
+  tasks:
+    - import_tasks: setup_zookeeper.yml
+      tags:
+        - zookeeper
+    - import_tasks: setup_postgres.yml
+      tags:
+        - postgres
+    - import_tasks: install_zuul.yml
+      tags:
+        - install_zuul
+    - import_tasks: setup_zuul_core.yml
+      tags:
+        - setup_zuul_core
+    - import_tasks: setup_zuul_web.yml
+      tags:
+        - setup_zuul_web

@@ -43,7 +43,7 @@ $ exit
 Update the local access setting:
 
 ```
-$ sudo sed -i /var/lib/pgsql/data/pg_hba.conf 's/127.0.0.1/32            ident/127.0.0.1/32            md5/'
+$ sudo sed -i 's|127.0.0.1/32            ident|127.0.0.1/32            md5|' /var/lib/pgsql/data/pg_hba.conf
 $ sudo systemctl restart posgreql
 ```
 

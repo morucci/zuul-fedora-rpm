@@ -1,0 +1,40 @@
+- name: Install postgres
+  package:
+    name:
+      - postgresql
+      - python3-psycopg2
+    state: present
+  become: true
+
+- name: Setup a postgres admin password 
+  shell: psql -c "ALTER USER postgres WITH PASSWORD 'mypassword';"
+  become_user: postgres
+  become: true
+  environment:
+    PGPASSWORD: mypassword
+
+- name: Create the database for zuul
+  shell: createdb --owner=postgres zuul
+  register: cmd
+  failed_when: cmd.rc != 0 and not "'already exists' in cmd.stderr"
+  ignore_errors: true
+  become_user: postgres
+  become: true
+  environment:
+    PGPASSWORD: mypassword
+
+- name: Enable auth access
+  shell: sed -i 's|127.0.0.1/32            ident|127.0.0.1/32            md5|' /var/lib/pgsql/data/pg_hba.conf
+  become: true
+
+- name: Restart postgres
+  service:
+    name: postgresql
+    state: restarted
+  become: true
+
+- name: Ensure postgres access
+  shell: psql -h 127.0.0.1 -U postgres zuul -c "\dt"
+  environment:
+    PGPASSWORD: mypassword
+

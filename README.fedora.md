@@ -2,7 +2,7 @@
 
 ## Upstream documentation
 
-The upstream documentation is available at that page: https://zuul-ci.org/docs/zuul/index.html
+The upstream documentation is available at: https://zuul-ci.org/docs/zuul/index.html
 
 ## Installation
 
@@ -10,17 +10,24 @@ This section describes the installation process of the minimal set of Zuul compo
 get a working Zuul deployment. Please refer to the upstream documentation for advanced
 setup.
 
-### Zookeeper
+Zuul requires a Web, a Zookeeper and SQL server running. This documentation covers all the step
+to bootstrap Zuul.
 
-TODO
+### Install and setup Zookeeper
 
-### Install Zuul components
+This process describes the minimal steps to get a Zookeeper service running. You
+should refer to the Zookeeper documentation to get a production setup if needed.
 
-To install the packages run:
-
-  $ sudo dnf install zuul-scheduler zuul-executor zuul-web zuul-webui
+  $ mkdir /tmp/zookeeper && cd /tmp/zookeeper
+  $ curl -OL https://downloads.apache.org/zookeeper/zookeeper-3.6.1/apache-zookeeper-3.6.1-bin.tar.gz
+  $ tar -xvzf apache-zookeeper-3.6.1-bin.tar.gz
+  $ cp apache-zookeeper-3.6.1-bin/conf/zoo_sample.cfg apache-zookeeper-3.6.1-bin/conf/zoo.cfg
+  $ sudo apache-zookeeper-3.6.1-bin/bin/zkServer.sh start
 
 ### Install and setup postgresql
+
+This process describes the minimal steps to get a postgres service running. You
+should refer to the postgrres documentation to get a production setup if needed.
 
   $ sudo dnf install -y posgresql python3-psycopg2
   $ su - postgres
@@ -38,6 +45,12 @@ Validate server connection by running:
 
   $ psql -h 127.0.0.1 -U postgres -W zuul
 
+### Install Zuul components
+
+To install the packages run:
+
+  $ sudo dnf install zuul-scheduler zuul-executor zuul-web zuul-webui
+
 ### Update the zuul configuration to define the sql connection
 
 In /etc/zuul/zuul.conf add the following:
@@ -48,8 +61,8 @@ In /etc/zuul/zuul.conf add the following:
 
 ### Setup Ansible virtual environment for the Zuul executor
 
-The Zuul executor is the component in charge of running Zuul Job. A Zuul job is
-a set of Ansible playbook. The Zuul executor support multiple version of Ansible.
+The Zuul executor is the component in charge of running Zuul Jobs. A Zuul job is
+a set of Ansible playbook. The Zuul executor supports multiple version of Ansible.
 Zuul provides a tool to manage the Ansible virtual environments. To initialize them
 run:
 
@@ -57,7 +70,7 @@ run:
 
 ### Build the Zuul web UI
 
-The Zuul web UI is a React application. The Zuul packaging provide the source code of
+The Zuul web UI is a React application. The Zuul packaging provides the source code of
 the application. The following process describe how to compile the source to get a
 production build:
 
@@ -111,9 +124,20 @@ Validate the access to the API via the reverse proxy:
 
 ## Run a first Zuul job
 
+In this section, you'll find the steps to get a first periodic job running.
+
+Please note that, this is a really basic configuration to ensure the services are working
+as expected. To go further, please refer to the Zuul documentation to learn how to connect
+Zuul to Code Review systems such as Github, Gerrit, Pagure. This demo uses the local system
+to run jobs but this has serious limitation and should not be used in production.
+Thus Nodepool must be used as the nodes and containers provider for Zuul.
+Nodepool supports various cloud providers. Nodepool is packaged into Fedora and here is
+its documentaion: https://zuul-ci.org/docs/nodepool/
+
 ### Prepare a Git repository to host the CI configuration
 
 We need to prepare a local Git repository to host the pipelines and jobs configuration.
+
 Follow the process below:
 
  $ git init /home/fedora/zuul-config
@@ -165,7 +189,7 @@ Then commit the configuration by running:
   $ git commit -m"Init demo config"
 
 
-### Run a simple Git deamon to serve the config repository
+### Run a Git deamon to serve the config repository
 
   $ dulwich web-daemon -l 0.0.0.0 /
 
@@ -193,8 +217,13 @@ In /etc/zuul/main.yaml add the following:
 
   $ sudo systemctl restart zuul-*
 
-## Access the web ui
+### Verify the job executed periodically
 
-  Access the build page, where you should see the periodic job my-noop runs
+Run the following command to access the builds API endpoint and ensure the
+my-noop job run as expected every minutes w/o errors.
 
-  http://<api_url>/t/default/builds
+  $ curl http://<host>/api/tenant/default/builds | python -m json.tool
+
+Access the build page, where you should see the periodic job my-noop runs
+
+  http://<host>/t/default/builds
